@@ -1,9 +1,9 @@
 let fs = require('fs');
 
-let data = fs.readFileSync('com_data.pgn', 'utf-8');
+let data = fs.readFileSync('data.pgn', 'utf-8');
 data = data.split('\n');
 
-const user = 'lukenguyenkhanh' // LukeNK
+const user = 'LukeNK' // LukeNK
 let luke = undefined, // white 0, black 1
     elo = [];
 

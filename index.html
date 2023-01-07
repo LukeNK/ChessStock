@@ -7,8 +7,8 @@
 function exp() {
     let cur, out = [], last = 0;
     for (let l1 = 0; l1 < data.length; l1++) {
-        // cur = data[data.length - l1 -1]; // for lichess
-        cur = data[l1]; // for chess.com
+        cur = data[data.length - l1 - 1]; // for lichess
+        // cur = data[l1]; // for chess.com
         out.push({'lable': l1, y: cur - last});
         last = cur;
     }

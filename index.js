@@ -1,29 +1,39 @@
 let fs = require('fs');
+let https = require('https');
 
-let data = fs.readFileSync('data.pgn', 'utf-8');
-data = data.split('\n');
+https.get('https://lichess.org/api/games/user/LukeNK?tags=true&clocks=false&evals=false&opening=false&perfType=rapid', (res) => {
+    let data = ''
+    res.on('data', (d) => { data += d });
+    res.on('end', () => {
+        const user = 'LukeNK' // LukeNK
+        let luke = undefined, // white 0, black 1
+            time = false, 
+            elo = [];
 
-const user = 'LukeNK' // LukeNK
-let luke = undefined, // white 0, black 1
-    elo = [];
+        data = data.split('\n');
+        data.forEach((line) => {
+            if (line == `[White "${user}"]`) luke = 0; 
+            else if (line == `[Black "${user}"]`) luke = 1;
 
-data.forEach((line) => {
+            // set time control, CAUTION: CHESS.COM IS DIFFERENT FROM LICHESS
+            if (line == '[TimeControl "600+0"]' || line == '[TimeControl "600"]') time = true;
 
-    if (line == `[White "${user}"]`) luke = 0; 
-    else if (line == `[Black "${user}"]`) luke = 1;
-
-    if (
-        (luke == 0 && line.slice(0, 11) == '[WhiteElo "') ||
-        (luke == 1 && line.slice(0, 11) == '[BlackElo "')
-    ) {
-        debugger
-        for (let l1 = 0; l1 < line.length; l1++) {
-            if (isNaN(parseInt(line[l1]))) {
-                line = line.substring(0, l1) + " " + line.substring(l1 + 1, line.length);
+            if (
+                (luke == 0 && line.slice(0, 11) == '[WhiteElo "') ||
+                (luke == 1 && line.slice(0, 11) == '[BlackElo "')
+            ) {
+                for (let l1 = 0; l1 < line.length; l1++)
+                    if (isNaN(parseInt(line[l1])))
+                        line = line.substring(0, l1) + " " + line.substring(l1 + 1, line.length);
+                line = line.replace(' ', '');
+                elo.push(parseInt(line));
+                // flag for next game
+                time = false;
             }
-        }
-        line = line.replace(' ', '');
-        elo.push(parseInt(line));
-    }
+        });
+        fs.writeFileSync('out.js', 'data = ' + JSON.stringify(elo, null, '\t'), 'utf-8')
+    })
+
+}).on('error', (e) => {
+    console.error(e);
 });
-fs.writeFileSync('out.js', 'data = ' + JSON.stringify(elo, null, '\t'), 'utf-8')

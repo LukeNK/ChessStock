@@ -5,6 +5,8 @@ https.get('https://lichess.org/api/games/user/LukeNK?tags=true&clocks=false&eval
     let data = ''
     res.on('data', (d) => { data += d });
     res.on('end', () => {
+        // data = fs.readFileSync('com_data.pgn', 'utf-8');
+
         const user = 'LukeNK' // LukeNK
         let luke = undefined, // white 0, black 1
             time = false, 

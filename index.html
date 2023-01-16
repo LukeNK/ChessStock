@@ -1,62 +1,65 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<script src="out.js"></script>
-<script>
-// ignore the first few games in lichess
-data = data.slice(0, 85)
-
-// ADJUST HERE FOR FLUCTUATION
-function exp() {
-    let cur, out = [], last = 0, top = 0;
-    for (let l1 = 0; l1 < data.length; l1++) { // set the starting game in lichess
-        cur = data[data.length - l1 - 1]; // for lichess, it is reverse
-        // cur = data[l1]; // for chess.com
-
-        // ignore down streak
-        if (cur - last < 0) {
-            if (!top) top = last;
-            last = cur;
-            continue;
-        } else if (top) {
-            console.log(last - top)
-            out.push({'lable': l1, y: last - top});
-            top = 0;
-        }
-
-        out.push({'lable': l1, y: cur - last});
-        last = cur;
-    }
-    return out;
-}
-window.onload = function () {
-    var chart = new CanvasJS.Chart("chartContainer", {
-        theme: "dark2", // "light1", "ligh2", "dark1",
-        animationEnabled: false,
-        title: {
-            text: "Luke's elo"
-        },
-        axisY: {
-            title: "Elo",
-            prefix: "",
-            suffix: "",
-            minimum: Math.min(...data),
-            maximum: Math.max(...data),
-            lineThickness: 0,
-            includeZero: true
-        },
-        data: [{
-            type: "waterfall",
-            yValueFormatString: "#,##0",
-            dataPoints: exp()
-        }]
-    });
-    chart.render();
-}
-</script>
+    <script src="out.js"></script>
 </head>
 <body>
-<div id="chartContainer" style="position: absolute; top: 0; left: 0; height: 100%; width: 100%;"></div>
-<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <div id="chartContainer" style="position: absolute; top: 0; left: 0; height: 100%; width: 100%;"></div>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </body>
+<script>
+    function mean(data) {
+        let sum = 0
+        for (const el of data) sum += el;
+        return sum / data.length;
+    }
+
+    // ignore the first few games in lichess
+    data = data.slice(0, 85);
+    
+    // ADJUST HERE FOR FLUCTUATION
+    function exp() {
+        let cur, out = [], start = 0, top = 0;
+        for (const l1 in data) { // set the starting game in lichess
+            cur = data[data.length - l1 - 1]; // for lichess, it is reverse
+            // cur = data[l1]; // for chess.com
+            if (top && cur > 0) {
+                // if there is streak and got out of streak
+                out.push({'label': start, y: top});
+                top = 0;
+            }
+            if (cur <= 0) {
+                // if it might be the start of the streak
+                if (!top) { top = cur; start = l1 }
+                else top += cur;
+            } else
+                out.push({'label': l1, y: cur});
+        }
+        return out;
+    }
+    window.onload = function () {
+        var chart = new CanvasJS.Chart("chartContainer", {
+            theme: "dark2", // "light1", "ligh2", "dark1",
+            animationEnabled: false,
+            title: {
+                text: "Mean fluctuation: " + mean(data).toFixed(3)
+            },
+            axisY: {
+                title: "Elo",
+                prefix: "",
+                suffix: "",
+                // minimum: Math.min(...data),
+                // maximum: Math.max(...data),
+                lineThickness: 0,
+                includeZero: true
+            },
+            data: [{
+                type: "waterfall",
+                yValueFormatString: "#,##0",
+                dataPoints: exp()
+            }]
+        });
+        chart.render();
+    }
+</script>
 </html>

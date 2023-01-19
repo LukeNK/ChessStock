@@ -8,6 +8,7 @@
     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </body>
 <script>
+    const GAMES_NUM = 100;
     function mean(data) {
         let sum = 0
         for (const el of data) sum += el;
@@ -15,11 +16,14 @@
     }
 
     // ignore the first few games in lichess
-    data = data.slice(0, data.length - 10);
+    data = data.slice(0, GAMES_NUM);
+    eloData = eloData.slice(0, GAMES_NUM);
     
     // ADJUST HERE FOR FLUCTUATION
     function exp() {
         let cur, out = [], start = 0, top = 0;
+        // before the loop, get first elo
+        out.push({'label': 0, y: eloData[eloData.length - 1]});
         for (const l1 in data) { // set the starting game in lichess
             cur = data[data.length - l1 - 1]; // for lichess, it is reverse
             // cur = data[l1]; // for chess.com
@@ -48,8 +52,8 @@
                 title: "Elo",
                 prefix: "",
                 suffix: "",
-                // minimum: Math.min(...data),
-                // maximum: Math.max(...data),
+                minimum: Math.min(...eloData),
+                maximum: Math.max(...eloData),
                 lineThickness: 0,
                 includeZero: true
             },

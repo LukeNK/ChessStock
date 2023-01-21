@@ -8,7 +8,8 @@
     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 </body>
 <script>
-    const GAMES_NUM = 100;
+    const GAMES_NUM = 100,
+        RELATIVE_CHART = true; // chart root at 0
     function mean(data) {
         let sum = 0
         for (const el of data) sum += el;
@@ -23,7 +24,7 @@
     function exp() {
         let cur, out = [], start = 0, top = 0;
         // before the loop, get first elo
-        out.push({'label': 0, y: eloData[eloData.length - 1]});
+        if (!RELATIVE_CHART) out.push({'label': 0, y: eloData[eloData.length - 1]});
         for (const l1 in data) { // set the starting game in lichess
             cur = data[data.length - l1 - 1]; // for lichess, it is reverse
             // cur = data[l1]; // for chess.com
@@ -52,8 +53,8 @@
                 title: "Elo",
                 prefix: "",
                 suffix: "",
-                minimum: Math.min(...eloData),
-                maximum: Math.max(...eloData),
+                minimum: (!RELATIVE_CHART)? Math.min(...eloData) : -100,
+                maximum: (!RELATIVE_CHART)? Math.max(...eloData) : 100,
                 lineThickness: 0,
                 includeZero: true
             },
@@ -63,6 +64,7 @@
                 dataPoints: exp()
             }]
         });
+        console.log(chart);
         chart.render();
     }
 </script>
